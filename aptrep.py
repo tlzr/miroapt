@@ -43,25 +43,3 @@ class Repository:
 
         return cache
 
-    def prepare_apt(self, distr, update_cache=False, cache_path='cache'):
-        try:
-            current_dir = os.getcwd()
-        except:
-            current_dir = './'
-
-        path_to_cache = os.path.join(current_dir, cache_path, distr)
-
-        if update_cache:
-            cache = self.prepare_cache(path_to_cache, distr)
-        else:
-            cache = apt.cache.Cache(rootdir=path_to_cache)
-            if len(cache) == 0:
-                cache = self.prepare_cache(path_to_cache, distr)
-
-                if len(cache) == 0:
-                    print('Cache is still empty after update. Check sources list. Aborting.')
-                    sys.exit(2)
-
-        return cache
-
-
