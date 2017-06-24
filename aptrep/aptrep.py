@@ -10,8 +10,7 @@ import urllib
 
 
 class Repository:
-    def prepare_cache(self, cache_dir='cache', sources_lists='/etc/apt/sources.list', keys='/etc/apt/trusted.gpg', force_cache_update=False):
-#        path_to_sources_list = os.path.join(cache_dir, 'etc/apt/sources.list.d')
+    def prepare_cache(self, cache_dir='cache', sources_lists='/etc/apt/sources.list', keys='', force_cache_update=False):
 
         if not os.path.exists(cache_dir):
             apt.cache.Cache(rootdir=cache_dir)
@@ -49,7 +48,8 @@ class Repository:
                 print('Unexpacted error:', os.sys.exc_info()[0])
                 raise
         else:
-           logging.warning('The key has not been provided.')
+           logging.warning('The key has not been provided. It may lead
+                            to an empty package list.')
 
         cache = apt.cache.Cache(rootdir=cache_dir)
         if force_cache_update:
