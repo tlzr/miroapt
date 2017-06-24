@@ -8,6 +8,8 @@ import re
 import shutil
 import urllib
 
+logging.getLogger(__name__).addHandler(logging.NullHandler())
+
 
 class Repository:
     def prepare_cache(self, cache_dir='cache', sources_lists='/etc/apt/sources.list', keys='', force_cache_update=False):
@@ -20,13 +22,21 @@ class Repository:
         if sources_lists:
             path_to_sources_list = os.path.join(cache_dir, 'etc/apt/sources.list')
             try:
+                if not os.path.exists(path_to_sources_list):
+                    os.makedirs(path_to_sources_list)
                 if isinstance(sources_lists, list):
                     for sources_list in sources_lists:
-                        if not os.path.exists(path_to_sources_list):
-                            os.makedirs(path_to_sources_list)
-                        shutil.copy2(sources_list, path_to_sources_list)
+                        if sources_list.startswith('http'):
+                            if not self.download(sources_list, path_to_sources_list):
+                                logging.warning('Source list is not available: %s', sources_list)
+                        else:
+                            shutil.copy2(sources_list, path_to_sources_list)
                 else:
-                        shutil.copy2(sources_lists, path_to_sources_list)
+                        if sources_lists.startswith('http'):
+                            if not self.download(sources_lists, path_to_sources_list):
+                                logging.warning('Source list is not available: %s', sources_lists)
+                        else:
+                            shutil.copy2(sources_lists, path_to_sources_list)
             except:
                         print('Unexpacted error:', os.sys.exc_info()[0])
                         raise
@@ -39,17 +49,21 @@ class Repository:
                 if isinstance(keys, list):
                     for key in keys:
                         if key.startswith('http'):
-                            if self.download(key, path_to_trusted_gpg_d):
+                            if not self.download(key, path_to_trusted_gpg_d):
+                                logging.warning('Key is not available: %s', key)
                         else:
                             shutil.copy2(key, path_to_trusted_gpg_d)
                 else:
-                    shutil.copy2(keys, path_to_trusted_gpg_d)
+                        if keys.startswith('http'):
+                            if not self.download(keys, path_to_trusted_gpg_d):
+                                logging.warning('Key is not available: %s', keys)
+                        else:
+                            shutil.copy2(keys, path_to_trusted_gpg_d)
             except:
                 print('Unexpacted error:', os.sys.exc_info()[0])
                 raise
         else:
-           logging.warning('The key has not been provided. It may lead
-                            to an empty package list.')
+           logging.warning("The key has not been provided. It may lead to an empty package list.")
 
         cache = apt.cache.Cache(rootdir=cache_dir)
         if force_cache_update:
@@ -69,11 +83,11 @@ class Repository:
                 raise
 
     def download(self, url, save_to_path):
-            save_to_path = os.path.join(save_to_path, filename)
-            url = sanitize_link(url)
+            url = self.sanitize_link(url)
             if url:
-                filename = get_file_from_link(url)
+                filename = self.get_file_from_link(url)
             if filename:
+                filename = os.path.join(save_to_path, filename)
                 try:
                     urllib.urlretrieve(url, filename=filename)
                 except:
@@ -82,10 +96,10 @@ class Repository:
                 return True
             return False
 
-    def get_file_from_link(self, url)
+    def get_file_from_link(self, url):
         if url:
             url.split('/')
-            filename = url.splot('/')[-1]
+            filename = url.split('/')[-1]
         if filename:
             return filename
         return None
