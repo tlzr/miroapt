@@ -109,5 +109,6 @@ sources.list.d/*
 # Ignore cache folder
 cache/
 
-# Ignore files
+# Ignore examples
 example.py
+example/
