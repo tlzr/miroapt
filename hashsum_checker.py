@@ -3,11 +3,9 @@
 
 import argparse
 import aptrep
-import sys
+
 
 def main(args):
-    print args
-
     if args.remove_cache:
         answer = raw_input('Do you really want to delete directories:\n%s\n%s\nPress "y" to continue.\n' % (args.cache_1, args.cache_2)) or 'n'
         if answer == 'y':
@@ -38,8 +36,8 @@ if __name__ == '__main__':
     second.add_argument('--cache-2', type=str, help='Cache location', default='cache/second')
     second.add_argument('--sources-2', type=str, help='Sources lists location')
     second.add_argument('--keys-2', type=str, help='Keys location')
-    second.add_argument('-u', '--update-cache', action='store_true', help='Force cache update')
-    second.add_argument('-r', '--remove-cache', action='store_true', help='Remove cache folders for both repositories')
+    parser.add_argument('-u', '--update-cache', action='store_true', help='Force cache update')
+    parser.add_argument('-r', '--remove-cache', action='store_true', help='Remove cache folders for both repositories')
     args = parser.parse_args()
 
     main(args)
